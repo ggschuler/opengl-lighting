@@ -1,6 +1,11 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include "Shader.h"
+
 
 void processInput(GLFWwindow* window);
 void error_callback(int error, const char* description);
@@ -22,7 +27,8 @@ int main()
     }
     glfwMakeContextCurrent(window);
     gladLoadGL();
-
+    
+    Shader simpleColorShader("simpleColor.vert", "simpleColor.frag");
 
     /* loop while window on */
     while (!glfwWindowShouldClose(window)) {
