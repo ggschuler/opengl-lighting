@@ -1,20 +1,47 @@
-// OpenGL_lighting.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <iostream>
+
+void processInput(GLFWwindow* window);
+void error_callback(int error, const char* description);
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    /* Initialize the library */
+    if (!glfwInit())
+        return -1;
+
+    glfwSetErrorCallback(error_callback);
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    GLFWwindow *window = glfwCreateWindow(640, 480, "OpenGL Lightning", NULL, NULL);
+    if (!window) {
+        glfwTerminate();
+        return -1;
+    }
+    glfwMakeContextCurrent(window);
+    gladLoadGL();
+
+
+    /* loop while window on */
+    while (!glfwWindowShouldClose(window)) {
+
+        processInput(window);
+
+        glfwSwapBuffers(window);
+
+        glfwPollEvents();
+    }
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
+void error_callback(int error, const char* description) {
+    fprintf(stderr, "Error: %s\n", description);
+}
 
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+void processInput(GLFWwindow *window) {
+
+    // Escape for quitting:
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+}
