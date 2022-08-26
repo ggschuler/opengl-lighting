@@ -37,10 +37,16 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="simpleColor.vert">
+    <None Include="lightningShader.vert">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="simpleColor.frag">
+    <None Include="lightningShader.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="constLightShader.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="constLightShader.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

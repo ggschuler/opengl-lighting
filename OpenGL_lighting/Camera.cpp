@@ -1,6 +1,6 @@
 #include "Camera.h"
 
-Camera::Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM))
+Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
 {
     Position = position;
     WorldUp = up;
@@ -9,7 +9,7 @@ Camera::Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = 
     updateCameraVectors();
 }
 
-Camera::Camera(float xPos, float yPos, float zPos, float xUp, float yUp, float zUp, float yaw, float pitch)
+Camera::Camera(float xPos, float yPos, float zPos, float xUp, float yUp, float zUp, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
 {
     Position = glm::vec3(xPos, yPos, zPos);
     WorldUp = glm::vec3(xUp, yUp, zUp);
@@ -32,14 +32,14 @@ void Camera::updateCameraVectors()
 }
 
 
-glm::mat4 Camera::getViewMatrix()
+glm::mat4 Camera::GetViewMatrix()
 {
     return glm::lookAt(Position, Position+Front, Up);
 }
 
 void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime)
 {
-    float velocity = MovementSpeed * deltaTime;
+    float velocity = MovSpeed * deltaTime;
     if (direction == FORWARD)
         Position += Front * velocity;
     if (direction == BACKWARD)
