@@ -14,7 +14,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 // constant positions
-Camera camera(glm::vec3(0.0f, 0.0f,3.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 float lastX = 320.0f;
@@ -31,14 +31,14 @@ int main()
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    GLFWwindow *window = glfwCreateWindow(640, 480, "OpenGL Lightning", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(640, 480, "OpenGL Lightning", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
     }
     glfwMakeContextCurrent(window);
     gladLoadGL();
-    
+
     glfwSetErrorCallback(error_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
@@ -46,7 +46,7 @@ int main()
     glEnable(GL_DEPTH_TEST);
 
 
-    Shader lightningShader("lightningShader.vert", "lightningShader.frag");
+    Shader lightingShader("lightningShader.vert", "lightningShader.frag");
     Shader constLightShader("constLightShader.vert", "constLightShader.frag");
 
     float vertices[] = {
@@ -103,7 +103,7 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     // normal att:
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     unsigned int lightVAO;
@@ -112,53 +112,62 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    
+
 
     /* loop while window on */
-    while (!glfwWindowShouldClose(window)) 
+    while (!glfwWindowShouldClose(window))
     {
-
+        // delta time math:
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-
-        processInput(window);
         
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        // input:
+        processInput(window);
+
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // activate shader:
-        lightningShader.use();
-        lightningShader.setVec3("lightPos", lightPos);
-
-        // pass projection matrix to shader (note that in this case it could change every frame)
+        // matrices math:
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)320 / (float)240, 0.1f, 100.0f);
-        lightningShader.setMat4("projection", projection);
-
-        // camera/view transformation
         glm::mat4 view = camera.GetViewMatrix();
-        lightningShader.setMat4("view", view);
-
         glm::mat4 model = glm::mat4(1.0f);
-        //model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(.0f,-1.0f,0.0f));
-        lightningShader.setMat4("model", model);
 
-        glm::vec3 objColor = glm::vec3(1.0f, 0.5f, 0.31f);
-        glm::vec3 ligColor = glm::vec3(1.0f, 1.0f, 1.0f);
-        lightningShader.setVec3("objectColor", objColor);
-        lightningShader.setVec3("lightColor", ligColor);
+        // activate shader and set uniforms:
+        lightingShader.use();
+ 
+        lightingShader.setVec3("viewPos", camera.Position);
+        lightingShader.setVec3("light.position", lightPos);
+        lightingShader.setMat4("projection", projection);
+        lightingShader.setMat4("view", view);
+        lightingShader.setMat4("model", model);
+        // material stuff:
+        glm::vec3 ambientColor = glm::vec3(1.0f, 0.5f, 0.31f);
+        glm::vec3 diffuseColor = glm::vec3(1.0f, 0.5f, 0.31f);
+        glm::vec3 specularColor = glm::vec3(0.5f, 0.5f, 0.5f);
+        lightingShader.setVec3("material.ambient", ambientColor);
+        lightingShader.setVec3("material.diffuse", diffuseColor);
+        lightingShader.setVec3("material.specular", specularColor);
+        lightingShader.setFloat("material.shininess", 32.0f);
+        // light stuff:
+        glm::vec3 ambientLight = diffuseColor * glm::vec3(0.2f); // low influence
+        glm::vec3 diffuseLight = glm::vec3(0.5f); // decrease the influence
+        glm::vec3 specularLight = glm::vec3(1.0f, 1.0f, 1.0f);
+        lightingShader.setVec3("light.ambient", ambientLight);
+        lightingShader.setVec3("light.diffuse", diffuseLight);
+        lightingShader.setVec3("light.specular", specularLight);
 
         glBindVertexArray(VAO);
-        
         glDrawArrays(GL_TRIANGLES, 0, 36);
-        
+
         constLightShader.use();
-        constLightShader.setMat4("projection", projection);
-        constLightShader.setMat4("view", view);
         model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
         model = glm::scale(model, glm::vec3(0.2f));
+        constLightShader.setMat4("projection", projection);
+        constLightShader.setMat4("view", view);
         constLightShader.setMat4("model", model);
+        constLightShader.setVec3("lightColor", ambientLight);
 
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -198,7 +207,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
-void processInput(GLFWwindow *window) {
+void processInput(GLFWwindow* window) {
 
     // Escape for quitting:
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
