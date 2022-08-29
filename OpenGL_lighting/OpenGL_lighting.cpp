@@ -8,6 +8,7 @@
 #include "Camera.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include <assimp/scene.h>
 
 
 void processInput(GLFWwindow* window);
@@ -139,8 +140,8 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    unsigned int diffuseMap = loadTexture("");
-    unsigned int specularMap = loadTexture("");
+    unsigned int diffuseMap = loadTexture("C:\\Users\\guilh\\OneDrive\\Desktop\\container2.png");
+    unsigned int specularMap = loadTexture("C:\\Users\\guilh\\OneDrive\\Desktop\\container2_specular.png");
 
     lightingShader.use();
     lightingShader.setInt("material.diffuse", 0);
