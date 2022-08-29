@@ -48,11 +48,8 @@ int main()
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glEnable(GL_DEPTH_TEST);
 
-
     Shader lightingShader("lightningShader.vert", "lightningShader.frag");
     Shader constLightShader("constLightShader.vert", "constLightShader.frag");
-
-
 
     float vertices[] = {
         // positions          // normals           // texture coords
@@ -112,6 +109,13 @@ int main()
     glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
+    glm::vec3 pointLightPositions[] = {
+    glm::vec3(0.7f,  0.2f,  2.0f),
+    glm::vec3(2.3f, -3.3f, -4.0f),
+    glm::vec3(-4.0f,  2.0f, -12.0f),
+    glm::vec3(0.0f,  0.0f, -3.0f)
+    };
+
     unsigned int VAO, VBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -135,11 +139,9 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    unsigned int diffuseMap = loadTexture("C:\\Users\\guilh\\OneDrive\\Desktop\\container2.png");
-    unsigned int specularMap = loadTexture("C:\\Users\\guilh\\OneDrive\\Desktop\\container2_specular.png");
+    unsigned int diffuseMap = loadTexture("");
+    unsigned int specularMap = loadTexture("");
 
-    // shader configuration
-    // --------------------
     lightingShader.use();
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
@@ -165,14 +167,10 @@ int main()
 
         // activate shader and set uniforms:
         lightingShader.use();
- 
-        lightingShader.setVec3("viewPos", camera.Position);
-        glm::vec3 lightDir = glm::vec3(-0.2f, -1.0f, -0.3f);
-        lightingShader.setVec3("light.direction", lightDir);
-        lightingShader.setVec3("light.position", lightPos);
         lightingShader.setMat4("projection", projection);
         lightingShader.setMat4("view", view);
         lightingShader.setMat4("model", model);
+
         // material stuff:
         glm::vec3 ambientColor = glm::vec3(1.0f, 0.5f, 0.31f);
         glm::vec3 diffuseColor = glm::vec3(1.0f, 0.5f, 0.31f);
@@ -181,21 +179,67 @@ int main()
         lightingShader.setVec3("material.diffuse", diffuseColor);
         lightingShader.setVec3("material.specular", specularColor);
         lightingShader.setFloat("material.shininess", 32.0f);
-        // light stuff:
-        glm::vec3 ambientLight = diffuseColor * glm::vec3(0.2f); // low influence
-        glm::vec3 diffuseLight = glm::vec3(0.5f); // decrease the influence
-        glm::vec3 specularLight = glm::vec3(1.0f, 1.0f, 1.0f);
-        lightingShader.setVec3("light.ambient", ambientLight);
-        lightingShader.setVec3("light.diffuse", diffuseLight);
-        lightingShader.setVec3("light.specular", specularLight);
-        lightingShader.setFloat("light.constant", 1.0f);
-        lightingShader.setFloat("light.linear", 0.09f);
-        lightingShader.setFloat("light.quadratic", 0.032f);
+        // directional light:
+        glm::vec3 dirLightDirection = glm::vec3(-0.2f, -1.0f, -0.3f);
+        glm::vec3 dirLightAmbient   = glm::vec3(0.05f, 0.05f, 0.05f);
+        glm::vec3 dirLightDiffuse   = glm::vec3(0.4f, 0.4f, 0.4f);
+        glm::vec3 dirLightSpecular  = glm::vec3(0.5f, 0.5f, 0.5f);
+        lightingShader.setVec3("dLight.direction", dirLightDirection);
+        lightingShader.setVec3("dLight.ambient", dirLightAmbient);
+        lightingShader.setVec3("dLight.diffuse", dirLightDiffuse);
+        lightingShader.setVec3("dLight.specular", dirLightSpecular);
+        glm::vec3 poLightDiffuse  = glm::vec3(0.8f, 0.8f, 0.8f);
+        glm::vec3 poLightSpecular = glm::vec3(1.0f, 1.0f, 1.0f);
+        // point light 1:
+        lightingShader.setVec3("pointLights[0].position", pointLightPositions[0]);
+        lightingShader.setVec3("pointLights[0].ambient", dirLightAmbient);
+        lightingShader.setVec3("pointLights[0].diffuse", poLightDiffuse);
+        lightingShader.setVec3("pointLights[0].specular", poLightSpecular);
+        lightingShader.setFloat("pointLights[0].constant", 1.0f);
+        lightingShader.setFloat("pointLights[0].linear", 0.09f);
+        lightingShader.setFloat("pointLights[0].quadratic", 0.032f);
+        // point light 2:
+        lightingShader.setVec3("pointLights[1].position", pointLightPositions[0]);
+        lightingShader.setVec3("pointLights[1].ambient", dirLightAmbient);
+        lightingShader.setVec3("pointLights[1].diffuse", poLightDiffuse);
+        lightingShader.setVec3("pointLights[1].specular", poLightSpecular);
+        lightingShader.setFloat("pointLights[1].constant", 1.0f);
+        lightingShader.setFloat("pointLights[1].linear", 0.09f);
+        lightingShader.setFloat("pointLights[1].quadratic", 0.032f);
+        // point light 3:
+        lightingShader.setVec3("pointLights[2].position", pointLightPositions[0]);
+        lightingShader.setVec3("pointLights[2].ambient", dirLightAmbient);
+        lightingShader.setVec3("pointLights[2].diffuse", poLightDiffuse);
+        lightingShader.setVec3("pointLights[2].specular", poLightSpecular);
+        lightingShader.setFloat("pointLights[2].constant", 1.0f);
+        lightingShader.setFloat("pointLights[2].linear", 0.09f);
+        lightingShader.setFloat("pointLights[2].quadratic", 0.032f);
+        // point light 4:
+        lightingShader.setVec3("pointLights[3].position", pointLightPositions[0]);
+        lightingShader.setVec3("pointLights[3].ambient", dirLightAmbient);
+        lightingShader.setVec3("pointLights[3].diffuse", poLightDiffuse);
+        lightingShader.setVec3("pointLights[3].specular", poLightSpecular);
+        lightingShader.setFloat("pointLights[3].constant", 1.0f);
+        lightingShader.setFloat("pointLights[3].linear", 0.09f);
+        lightingShader.setFloat("pointLights[3].quadratic", 0.032f);
+        // spot light:
+        glm::vec3 spotLightAmbient = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3 spotLightDiffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+        lightingShader.setVec3("sLight.position", camera.Position);
+        lightingShader.setVec3("sLight.direction", camera.Front);
+        lightingShader.setVec3("sLight.ambient", spotLightAmbient);
+        lightingShader.setVec3("sLight.diffuse", spotLightDiffuse);
+        lightingShader.setVec3("sLight.specular", spotLightDiffuse);
+        lightingShader.setFloat("sLight.constant", 1.0f);
+        lightingShader.setFloat("sLight.linear", 0.09f);
+        lightingShader.setFloat("sLight.quadratic", 0.032f);
+        lightingShader.setFloat("sLight.incutoff", glm::cos(glm::radians(12.5f)));
+        lightingShader.setFloat("sLight.outcutoff", glm::cos(glm::radians(17.0f)));
 
-        // bind diffuse map
+        // diffuse map:
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, diffuseMap);
-        // bind specular map
+        // specular map
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
 
@@ -218,13 +262,10 @@ int main()
         constLightShader.setMat4("projection", projection);
         constLightShader.setMat4("view", view);
         constLightShader.setMat4("model", model);
-        constLightShader.setVec3("lightColor", ambientLight);
+        constLightShader.setVec3("lightColor", dirLightAmbient);
 
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
-
 
         glfwSwapBuffers(window);
 
